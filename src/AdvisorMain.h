@@ -14,10 +14,10 @@ class AdvisorMain {
         void printHelp(std::string helpOption);
         void printProd();
         void printMinOrMax(std::string userOption);
-        void printAvg();
+        void printAvg(std::string userOption);
         void printPredict();
         void printTime();
-        void nextTimeStep();
+        void nextTimeframe();
         std::string getUserOption();
         void processUserOption(std::string userOption);
 

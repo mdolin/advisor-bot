@@ -133,7 +133,7 @@ void AdvisorMain::printMinOrMax(std::string userOption) {
     }
 }
 
-void AdvisorMain::printAvg() {
+void AdvisorMain::printAvg(std::string userOption) {
 
 }
 
@@ -147,8 +147,10 @@ void AdvisorMain::printTime() {
 
 }
 
-void AdvisorMain::nextTimeStep() {
-
+void AdvisorMain::nextTimeframe() {
+    currentTime = orderBook.getNextTime(currentTime);
+    std::cout << botPrompt << "now at ";
+    printTime();
 }
 
 std::string AdvisorMain::getUserOption() {
@@ -166,12 +168,15 @@ void AdvisorMain::processUserOption(std::string userOption) {
         printProd();
     } else if ((userOption.rfind("min", 0) == 0) || (userOption.rfind("max", 0) == 0)) {
         printMinOrMax(userOption);
-    }
-    else if (userOption == "time") {
+    } else if (userOption.rfind("avg", 0) == 0) {
+        printAvg(userOption);
+    } else if (userOption.rfind("predict", 0) == 0) {
+        printPredict();
+    } else if (userOption == "time") {
         printTime();
-    }
-    
-    else if (userOption == "exit") {
+    } else if (userOption.rfind("step", 0) == 0) {
+        nextTimeframe();
+    } else if (userOption == "exit") {
         std::cout << botPrompt << "Goodbye!" << std::endl;
         exit(3);
     }
