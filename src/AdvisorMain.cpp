@@ -12,7 +12,7 @@ AdvisorMain::AdvisorMain() {
 void AdvisorMain::init() {
     std::string input;
     currentTime = orderBook.getEarliestTime();
-    printMenu();
+    printMOTD();
 
     while(true)
     {
@@ -21,7 +21,7 @@ void AdvisorMain::init() {
     }
 }
 
-void AdvisorMain::printMenu() {
+void AdvisorMain::printMOTD() {
     std::cout << "Advisorbot is a command line program that can carry out" << std::endl;
     std::cout << "various tasks to help a cryptocurrency investor analyse"  << std::endl;
     std::cout << "the data available on an exchange." << std::endl;
@@ -94,6 +94,8 @@ void AdvisorMain::printHelp(std::string helpOption) {
 
 void AdvisorMain::printProd() {
     bool first = true;
+
+    // Loop through known products and pretty print them
     for (std::string const& p : orderBook.getKnownProducts()) {
         // std::cout << botPrompt << p << std::endl;
         if (first) {
@@ -107,6 +109,7 @@ void AdvisorMain::printProd() {
 }
 
 void AdvisorMain::printMinOrMax(std::string userOption) {
+    // tokenise input data on spaces to get min or max, product (ETH/BTC) and type (bid or ask)
     std::vector<std::string> tokens = CSVReader::tokenise(userOption, ' ');
     std::string product;
     std::string type;
@@ -115,21 +118,24 @@ void AdvisorMain::printMinOrMax(std::string userOption) {
     std::cout.precision(10);
     std::cout << std::fixed;
 
+    // Check that there are three tokens (min/max, product, type)
+    
     if (tokens.size() != 3) {
-        std::cout << "Wrong input, type 'help min'" << std::endl;
+        std::cout << "Wrong input, type 'help <cmd>'" << std::endl;
     } else {
         product = tokens[1];
         type = tokens[2];
     }
 
+    // Loop through known products and print low price or high price.
     for (std::string const& p : orderBook.getKnownProducts()) {
-        if (product == p) {
+        if (product == p && (type == "bid" || type == "ask")) {
             std::vector<OrderBookEntry> entries = orderBook.getOrders(OrderBookEntry::stringToOrderBookType(type), p, currentTime);
             if (tokens[0] == "min") {
                 std::cout << botPrompt << "The min " << type << " for " << product << " is " << OrderBook::getLowPrice(entries) << std::endl;
             } else if (tokens[0] == "max")
             std::cout << botPrompt << "The max " << type << " for " << product << " is " << OrderBook::getHighPrice(entries) << std::endl;
-        }
+        } 
     }
 }
 
@@ -179,5 +185,7 @@ void AdvisorMain::processUserOption(std::string userOption) {
     } else if (userOption == "exit") {
         std::cout << botPrompt << "Goodbye!" << std::endl;
         exit(3);
+    } else {
+        std::cout << "Type 'help' for help" << std::endl;
     }
 }
