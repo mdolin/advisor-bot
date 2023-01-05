@@ -148,18 +148,21 @@ void AdvisorMain::printPredict() {
 }
 
 void AdvisorMain::printTime() {
+    // tokenise time to rid of the decimal point of seconds
     std::vector<std::string> timeOutput = CSVReader::tokenise(currentTime, '.');
     std::cout << timeOutput[0] << std::endl;
 
 }
 
 void AdvisorMain::nextTimeframe() {
+    // jump to next time frame and print time
     currentTime = orderBook.getNextTime(currentTime);
     std::cout << botPrompt << "now at ";
     printTime();
 }
 
 std::string AdvisorMain::getUserOption() {
+    // get user input
     std::string userOption;
     std::cout << userPrompt;
     std::getline(std::cin, userOption);
@@ -168,6 +171,7 @@ std::string AdvisorMain::getUserOption() {
 }
 
 void AdvisorMain::processUserOption(std::string userOption) {
+    // process user input
     if (userOption.rfind("help", 0) == 0) {
         printHelp(userOption);
     } else if (userOption == "prod") {
