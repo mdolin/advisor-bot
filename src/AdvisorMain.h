@@ -28,6 +28,8 @@ class AdvisorMain {
         void nextTimeframe();
         /** get user input from command line*/
         std::string getUserOption();
+        /** check product*/
+        bool knownProduct(std::string product);
         /** process used input*/
         void processUserOption(std::string userOption);
 
