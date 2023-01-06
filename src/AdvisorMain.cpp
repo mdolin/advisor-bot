@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <algorithm>
 #include "OrderBook.h"
 #include "AdvisorMain.h"
 #include "CSVReader.h"
@@ -11,7 +12,7 @@ AdvisorMain::AdvisorMain() {
 
 void AdvisorMain::init() {
     std::string input;
-    currentTime = orderBook.getEarliestTime();
+    currentTime.first = orderBook.getEarliestTime();
     printMOTD();
 
     while(true)
@@ -93,6 +94,7 @@ void AdvisorMain::printHelp(std::string helpOption) {
 }
 
 void AdvisorMain::printProd() {
+    // flag for comma
     bool first = true;
 
     // Loop through known products and pretty print them
@@ -113,15 +115,19 @@ void AdvisorMain::printMinOrMax(std::string userOption) {
     std::vector<std::string> tokens = CSVReader::tokenise(userOption, ' ');
     std::string product;
     std::string type;
+    bool unknownProd = false;
 
     // to not use scientific notation
     std::cout.precision(10);
     std::cout << std::fixed;
 
     // Check that there are three tokens (min/max, product, type)
-    
     if (tokens.size() != 3) {
         std::cout << "Wrong input, type 'help <cmd>'" << std::endl;
+        return;
+    } else if ((tokens[0] != "min" && tokens[0] != "max") || (tokens[2] != "ask" && tokens[2] != "bid")) {
+        std::cout << "Wrong input, type 'help <cmd>'" << std::endl;
+        return;
     } else {
         product = tokens[1];
         type = tokens[2];
@@ -129,18 +135,64 @@ void AdvisorMain::printMinOrMax(std::string userOption) {
 
     // Loop through known products and print low price or high price.
     for (std::string const& p : orderBook.getKnownProducts()) {
-        if (product == p && (type == "bid" || type == "ask")) {
-            std::vector<OrderBookEntry> entries = orderBook.getOrders(OrderBookEntry::stringToOrderBookType(type), p, currentTime);
+        if (product == p) {
+            std::vector<OrderBookEntry> entries = orderBook.getOrders(OrderBookEntry::stringToOrderBookType(type), p, currentTime.first);
             if (tokens[0] == "min") {
                 std::cout << botPrompt << "The min " << type << " for " << product << " is " << OrderBook::getLowPrice(entries) << std::endl;
             } else if (tokens[0] == "max")
             std::cout << botPrompt << "The max " << type << " for " << product << " is " << OrderBook::getHighPrice(entries) << std::endl;
-        } 
+            unknownProd = true;
+        }
+    }
+    if (!unknownProd) {
+        std::cout << "Unknown product" << std::endl;
     }
 }
 
 void AdvisorMain::printAvg(std::string userOption) {
+    std::vector<std::string> tokens = CSVReader::tokenise(userOption, ' ');
+    std::string product;
+    std::string type;
+    double average;
+    int timeSteps;
+    int stepsBack;
+    int stepsSkip;
+    bool unknownProd = false;
 
+    // to not use scientific notation
+    std::cout.precision(10);
+    std::cout << std::fixed;
+
+    // Check that there are three tokens (min/max, product, type)
+    if (tokens.size() != 4) {
+        std::cout << "Wrong input, type 'help <cmd>'" << std::endl;
+        return;
+    } else if ((tokens[0] != "avg") || (tokens[2] != "ask" && tokens[2] != "bid")) {
+        std::cout << "Wrong input, type 'help <cmd>'" << std::endl;
+        return;
+    } else {
+        product = tokens[1];
+        type = tokens[2];
+        timeSteps = std::stoi(tokens[3]);
+    }
+
+
+    std::vector<OrderBookEntry> orders = orderBook.getOrders(OrderBookEntry::stringToOrderBookType(type), product, currentTime.first);
+    std::sort(orders.begin(), orders.end(), OrderBookEntry::compareByTimestamp);
+
+    if (timeSteps > currentTime.second) {
+        std::cout << botPrompt << "Wrong input. Went too far back in time. Current timesteps: " << currentTime.second << std::endl;
+        return;
+    } else {
+        stepsBack = timeSteps;
+        stepsSkip = std::max(currentTime.second - timeSteps, 0);
+    }
+
+    std::vector<OrderBookEntry> ordersBack;
+    ordersBack = std::vector<OrderBookEntry>(orders.begin() + stepsSkip, orders.begin() + stepsBack);
+
+    average = OrderBook::getMeanValue(ordersBack);
+    std::cout << botPrompt << "The average " << product << " " << type << " price over the last " << stepsBack << " timesteps was " << average << std::endl;
 }
 
 void AdvisorMain::printPredict() {
@@ -149,16 +201,16 @@ void AdvisorMain::printPredict() {
 
 void AdvisorMain::printTime() {
     // tokenise time to rid of the decimal point of seconds
-    std::vector<std::string> timeOutput = CSVReader::tokenise(currentTime, '.');
-    std::cout << timeOutput[0] << std::endl;
+    std::vector<std::string> timeOutput = CSVReader::tokenise(currentTime.first, '.');
+    std::cout << timeOutput[0] << ", Timesteps: " << currentTime.second << std::endl;
 
 }
 
 void AdvisorMain::nextTimeframe() {
     // jump to next time frame and print time
-    currentTime = orderBook.getNextTime(currentTime);
-    std::cout << botPrompt << "now at ";
-    printTime();
+    currentTime.first = orderBook.getNextTime(currentTime.first);
+    currentTime.second++;
+    std::cout << botPrompt << "now at " << currentTime.first <<  std::endl;
 }
 
 std::string AdvisorMain::getUserOption() {

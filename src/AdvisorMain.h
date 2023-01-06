@@ -31,9 +31,9 @@ class AdvisorMain {
         /** process used input*/
         void processUserOption(std::string userOption);
 
+        int stepsTaken;
         std::string botPrompt = "advisorbot> ";
         std::string userPrompt = "user> ";
-
-        std::string currentTime;
+        std::pair<std::string, int> currentTime = {"", 0};
         OrderBook orderBook{"20200601.csv"};
 };

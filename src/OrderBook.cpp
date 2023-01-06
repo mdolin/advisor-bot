@@ -94,6 +94,21 @@ std::string OrderBook::getNextTime(std::string timestamp)
     return next_timestamp;
 }
 
+double OrderBook::getMeanValue(std::vector<OrderBookEntry>& orders) {
+    double sum = 0;
+    int count = 0;
+
+    if (orders.empty())
+        return 0;
+
+    for (OrderBookEntry& e : orders) {
+        count++;
+        sum += e.price;
+    }
+
+    return sum / count;
+}
+
 void OrderBook::insertOrder(OrderBookEntry& order)
 {
     orders.push_back(order);
