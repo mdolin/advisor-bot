@@ -21,7 +21,7 @@ class AdvisorMain {
         /** compute average ask or bid for the sent product over the sent number of time steps*/
         void printAvg(std::string userOption);
         /** predict max or min ask or bid for the sent product for the next time step*/
-        void printPredict();
+        void printPredict(std::string userOption);
         /** state current time in dataset*/
         void printTime();
         /** move to next time step*/
@@ -37,5 +37,6 @@ class AdvisorMain {
         std::string botPrompt = "advisorbot> ";
         std::string userPrompt = "user> ";
         std::pair<std::string, int> currentTime = {"", 0};
+        std::vector<std::pair<std::string, int>> timesteps; 
         OrderBook orderBook{"20200601.csv"};
 };
