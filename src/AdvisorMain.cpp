@@ -235,7 +235,7 @@ void AdvisorMain::printPredict(std::string userOption) {
         ordersPerTime.push_back(orderBook.getOrders(OrderBookEntry::stringToOrderBookType(type), product, currentTime.first));
     } else {
         for (int i = 0; i < currentTime.second; i++) {
-            std::cout << timesteps[i].first << timesteps[i].second << std::endl;
+            // std::cout << timesteps[i].first << timesteps[i].second << std::endl;
             ordersPerTime.push_back(orderBook.getOrders(OrderBookEntry::stringToOrderBookType(type), product, timesteps[i].first));
         }
     }
