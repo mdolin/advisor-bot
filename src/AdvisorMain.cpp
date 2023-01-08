@@ -112,7 +112,7 @@ void AdvisorMain::printProd() {
     std::cout << "" << std::endl;
 }
 
-void AdvisorMain::printMinOrMax(std::string userOption) {
+void AdvisorMain::printMinMax(std::string userOption) {
     // tokenise input data on spaces to get min or max, product (ETH/BTC) and type (bid or ask)
     std::vector<std::string> tokens = CSVReader::tokenise(userOption, ' ');
     std::string minMax;
@@ -230,8 +230,14 @@ void AdvisorMain::printPredict(std::string userOption) {
 
     // get order book entry by timestep
     std::vector<std::vector<OrderBookEntry>> ordersPerTime;
-    for (int i = 0; i < currentTime.second; i++) {
-        ordersPerTime.push_back(orderBook.getOrders(OrderBookEntry::stringToOrderBookType(type), product, timesteps[i].first));
+
+    if (timesteps.size() == 0) {
+        ordersPerTime.push_back(orderBook.getOrders(OrderBookEntry::stringToOrderBookType(type), product, currentTime.first));
+    } else {
+        for (int i = 0; i < currentTime.second; i++) {
+            std::cout << timesteps[i].first << timesteps[i].second << std::endl;
+            ordersPerTime.push_back(orderBook.getOrders(OrderBookEntry::stringToOrderBookType(type), product, timesteps[i].first));
+        }
     }
 
     // find min or max for every order book entry and calculate moving average
@@ -265,7 +271,7 @@ void AdvisorMain::printTime() {
 }
 
 void AdvisorMain::nextTimeframe() {
-    // jump to next time frame and print time
+    // jump to next time frame and print time and push current time in timesteps to use it in predict
     timesteps.push_back(currentTime);
     currentTime.first = orderBook.getNextTime(currentTime.first);
     currentTime.second++;
@@ -301,7 +307,7 @@ void AdvisorMain::processUserOption(std::string userOption) {
     } else if (userOption == "prod") {
         printProd();
     } else if ((userOption.rfind("min", 0) == 0) || (userOption.rfind("max", 0) == 0)) {
-        printMinOrMax(userOption);
+        printMinMax(userOption);
     } else if (userOption.rfind("avg", 0) == 0) {
         printAvg(userOption);
     } else if (userOption.rfind("predict", 0) == 0) {

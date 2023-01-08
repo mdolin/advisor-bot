@@ -17,7 +17,7 @@ class AdvisorMain {
         /** list available products*/
         void printProd();
         /** find min/max bid or ask for product in currnt time step*/
-        void printMinOrMax(std::string userOption);
+        void printMinMax(std::string userOption);
         /** compute average ask or bid for the sent product over the sent number of time steps*/
         void printAvg(std::string userOption);
         /** predict max or min ask or bid for the sent product for the next time step*/
